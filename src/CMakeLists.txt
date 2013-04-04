@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(libuseful)
 
+OPTION(LIBUSEFUL_BUILD_TESTS "build tests for libuseful" ON)
+
 FIND_PROGRAM(DiffFound diff)
 IF(DiffFound STREQUAL "DiffFound-NOTFOUND")
     MESSAGE(FATAL_ERROR "The diff tool is not found on your system.  This is required for testing!")
@@ -32,21 +34,22 @@ SET(useful_LIB_SRCS
 	include/optin.h
 )
 
+  INCLUDE_DIRECTORIES(include)
 
-INCLUDE_DIRECTORIES(include)
+  ADD_LIBRARY(useful ${useful_LIB_SRCS})
 
-ADD_LIBRARY(useful ${useful_LIB_SRCS})
+IF (LIBUSEFUL_BUILD_TESTS)
+	ENABLE_TESTING()
 
-ENABLE_TESTING()
+	ADD_EXECUTABLE(hashtable_test platform.c list.c hashtable.c testing/hashtable_test.c)
+	ADD_TEST(hashtable_0 ${EXECUTABLE_OUTPUT_PATH}/hashtable_test)
 
-ADD_EXECUTABLE(hashtable_test platform.c list.c hashtable.c testing/hashtable_test.c)
-ADD_TEST(hashtable_0 ${EXECUTABLE_OUTPUT_PATH}/hashtable_test)
+	ADD_EXECUTABLE(stringbuilder_test platform.c stringbuilder.c testing/stringbuilder_test.c)
+	ADD_TEST(stringbuilder_0 ${EXECUTABLE_OUTPUT_PATH}/stringbuilder_test)
 
-ADD_EXECUTABLE(stringbuilder_test platform.c stringbuilder.c testing/stringbuilder_test.c)
-ADD_TEST(stringbuilder_0 ${EXECUTABLE_OUTPUT_PATH}/stringbuilder_test)
+	ADD_EXECUTABLE(platform_test platform.c testing/platform_test.c)
+	ADD_TEST(platform_0 ${EXECUTABLE_OUTPUT_PATH}/platform_test)
 
-ADD_EXECUTABLE(platform_test platform.c testing/platform_test.c)
-ADD_TEST(platform_0 ${EXECUTABLE_OUTPUT_PATH}/platform_test)
-
-ADD_EXECUTABLE(optin_test list.c hashtable.c platform.c optin.c testing/optin_test.c)
-ADD_TEST(optin_0 ${EXECUTABLE_OUTPUT_PATH}/optin_test --test=1 -fval2 3.14 -ival2 10 -strval2 "this is a string" -g)
+	ADD_EXECUTABLE(optin_test list.c hashtable.c platform.c optin.c testing/optin_test.c)
+	ADD_TEST(optin_0 ${EXECUTABLE_OUTPUT_PATH}/optin_test --test=1 -fval2 3.14 -ival2 10 -strval2 "this is a string" -g)
+ENDIF(LIBUSEFUL_BUILD_TESTS)
